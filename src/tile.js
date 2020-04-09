@@ -8,12 +8,14 @@ class Tile extends React.Component{
         this.state = {
             id:[],
             skin:[],
+            position:[],
         }
     }
-    componentDidMount(){
-        this.setState({
+    async componentDidMount(){
+        await this.setState({
             id: this.props.input.id,
             skin: this.props.input.skin,
+            position: this.props.input.position
         })
         console.log("Tile state: ", this.state)
     }
@@ -21,7 +23,7 @@ class Tile extends React.Component{
 
     render(){
         return(
-            <Col id={this.state.id}>
+            <Col className="border" onClick={this.props.handleClick} id={this.state.id}>
                 {this.state.skin}
             </Col>
         )
