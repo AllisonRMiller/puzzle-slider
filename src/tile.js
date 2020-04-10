@@ -17,12 +17,12 @@ class Tile extends React.Component{
             skin: this.props.input.skin,
             position: this.props.input.position
         })
-        console.log("Tile state: ", this.state)
+        // console.log("Tile state: ", this.state)
     }
 
     async componentDidUpdate(){
 
-        await console.log("Tile state: ", this.state)
+        // await console.log("Tile state: ", this.state)
     }
 
 

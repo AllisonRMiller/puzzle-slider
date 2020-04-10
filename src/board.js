@@ -1,24 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { h1, Button, Container, Row, Col } from "reactstrap";
-// import "bootstrap/dist/css/bootstrap.min.css"
 import Tile from "./tile";
 
 class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            winPOS: [],
             currentPOS: []
         }
+
         this.starterPositions = this.starterPositions.bind(this);
         this.handleClick = this.handleClick.bind(this);
         this.makeMove = this.makeMove.bind(this);
+        this.shuffle=this.shuffle.bind(this);
+        this.generateCheckWin = this.generateCheckWin.bind(this);
 
     }
 
     componentDidMount() {
         // set startPOS here
         this.starterPositions();
+        this.generateCheckWin();
         // shuffle here
     }
 
@@ -41,39 +45,56 @@ class Board extends React.Component {
         await this.setState({
             currentPOS: outerPOS
         })
-        const startPOS = outerPOS
         console.log("state at start: ", this.state)
-        return startPOS
     }
 
 
-
+    async generateCheckWin(){
+        var innerPOS = [];
+        var outerPOS = [];
+        for (var i = 0; i < 4; i++) {
+            innerPOS = [];
+            for (var j = 0; j < 4; j++) {
+                let starterTile = {
+                    id: [i, j],
+                    skin: [i, j],
+                    position: [i, j]
+                }
+                innerPOS.push(starterTile)
+            }
+            outerPOS.push(innerPOS)
+        }
+        let endPOS=outerPOS;
+        await this.setState({
+            winPOS: endPOS
+        })
+    }
+    
 
 
     componentDidUpdate() {
         // checkwin here by comparing startPOS to currentPOS
+        console.log("component updated");
+        console.log("winArray: ", this.state.winPOS);
+        let finishPOS = this.state.winPOS;
+        let localPOS = this.state.currentPOS;
+        if (localPOS===finishPOS){console.log("win!")}
         // disable all click handlers if checkwin goes through
     }
 
     async makeMove(foundTile, zeroTile) {
         console.log("makeMove ran");
-        console.log(foundTile);
-        console.log(zeroTile);
         // create proxy variables
         let ft1= foundTile.position[0];
         let ft2= foundTile.position[1]; 
         let zt1=zeroTile.position[0];
         let zt2=zeroTile.position[1]; 
         let tempTile=foundTile;
-        console.log("tempTile: ", tempTile);
         foundTile = zeroTile;
         foundTile.position=[ft1,ft2];
-        console.log("foundTile: ", foundTile)
         let blankTile = tempTile;
         blankTile.position=[zt1,zt2];
-        console.log("blankTile: ", blankTile);
         let tempArray = this.state.currentPOS;
-        console.log(tempArray);
         tempArray[ft1][ft2] = foundTile;
         tempArray[zt1][zt2] = blankTile;
         console.log(tempArray);
@@ -84,14 +105,11 @@ class Board extends React.Component {
     }
 
 
-
     handleClick(e) {
         e.preventDefault();
-        console.log("tile: ", e.target.id)
         let clickArr = this.state.currentPOS;
         let foundTile = clickArr.map(y => y.find((x) => { if (x.id == e.target.id) return x })).filter(x => x != undefined)
         foundTile = foundTile[0];
-        console.log(foundTile, "tile POS: ", foundTile.position)
         let ind1 = foundTile.position[0]
         let ind2 = foundTile.position[1]
         let blank = [0, 0]
@@ -116,9 +134,43 @@ class Board extends React.Component {
 
     }
 
+    async shuffle(){
+        console.log("Shuffle ran");
+        let clickArr = this.state.currentPOS;
+        console.log(clickArr);
+        let blankCoord = [0,0];
+        let tempArray = clickArr;
+        // zero tile identifies all neighbors and randomly selects a move from one of these options
+        for (let i = Math.floor(Math.random() * 20)+5; i>0; i--){
+        let blankTile = clickArr.map(y => y.find((x) => { if (JSON.stringify(x.id) == JSON.stringify(blankCoord)) return x })).filter(x => x != undefined);
+        blankTile= blankTile[0];
+        let blankInd1= blankTile.position[0];
+        let blankInd2= blankTile.position[1];
+        let blankNeighbors = [];
+        if(blankInd1 - 1 >= 0){blankNeighbors.push([blankInd1-1,blankInd2])};
+        if(blankInd1 + 1 < clickArr.length ){blankNeighbors.push([blankInd1+1,blankInd2])};
+        if(blankInd2 - 1 >= 0){blankNeighbors.push([blankInd1,blankInd2-1])};
+        if(blankInd2 + 1 < clickArr.length){blankNeighbors.push([blankInd1,blankInd2+1])};
+        let randomNeighbor = Math.floor((Math.random()) * (blankNeighbors.length));
+        let newNeighbor = blankNeighbors[randomNeighbor];
+        let tempTile=clickArr[newNeighbor[0]][newNeighbor[1]];
+        let neighborTile = blankTile;
+        neighborTile.position=[newNeighbor[0],newNeighbor[1]];
+        let zeroTile = tempTile;
+        zeroTile.position=[blankInd1,blankInd2];
+        tempArray[newNeighbor[0]][newNeighbor[1]] = neighborTile;
+        tempArray[blankInd1][blankInd2] = zeroTile}
+        console.log("tempArray: ", tempArray)
+        await this.setState({
+            currentPOS : tempArray
+        });
+    }
+
+
+    // make button say "start">"retry"> on win "Play again">reset board
     render() {
         return (
-            <Container className="text-center">
+            <Container className="text-center bg-light">
                 <Row className="justify-content-center">
                     <h1>Puzzle Slider</h1>
                 </Row>
@@ -131,6 +183,7 @@ class Board extends React.Component {
                                     input={item2}
                                     handleClick={this.handleClick}
                                 />))}</Row>)}
+                                <Row><Button onClick={this.shuffle}>Start</Button></Row>
             </Container>
         )
     }
