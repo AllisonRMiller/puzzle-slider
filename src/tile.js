@@ -20,11 +20,16 @@ class Tile extends React.Component{
         console.log("Tile state: ", this.state)
     }
 
+    async componentDidUpdate(){
+
+        await console.log("Tile state: ", this.state)
+    }
+
 
     render(){
         return(
-            <Col className="border" onClick={this.props.handleClick} id={this.state.id}>
-                {this.state.skin}
+            <Col className="border" onClick={this.props.handleClick} id={this.props.input.id}>
+                {this.props.input.skin}
             </Col>
         )
     }
