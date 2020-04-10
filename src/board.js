@@ -76,8 +76,8 @@ class Board extends React.Component {
         // checkwin here by comparing startPOS to currentPOS
         console.log("component updated");
         console.log("winArray: ", this.state.winPOS);
-        let finishPOS = this.state.winPOS;
-        let localPOS = this.state.currentPOS;
+        let finishPOS = JSON.stringify(this.state.winPOS);
+        let localPOS = JSON.stringify(this.state.currentPOS);
         if (localPOS===finishPOS){console.log("win!")}
         // disable all click handlers if checkwin goes through
     }
