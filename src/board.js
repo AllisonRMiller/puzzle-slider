@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { h1, Button, Container, Row, Col } from "reactstrap";
+import {Button, Container, Row} from "reactstrap";
 import Tile from "./tile";
 
 class Board extends React.Component {
@@ -79,12 +79,12 @@ class Board extends React.Component {
         let finishPOS = JSON.stringify(this.state.winPOS);
         let localPOS = JSON.stringify(this.state.currentPOS);
         if (localPOS===finishPOS){console.log("win!")}
-        // disable all click handlers if checkwin goes through
+        // popup will fire when win condition met
     }
 
     async makeMove(foundTile, zeroTile) {
         console.log("makeMove ran");
-        // create proxy variables
+
         let ft1= foundTile.position[0];
         let ft2= foundTile.position[1]; 
         let zt1=zeroTile.position[0];
@@ -105,10 +105,11 @@ class Board extends React.Component {
     }
 
 
-    handleClick(e) {
+    async handleClick(e) {
         e.preventDefault();
         let clickArr = this.state.currentPOS;
-        let foundTile = clickArr.map(y => y.find((x) => { if (x.id == e.target.id) return x })).filter(x => x != undefined)
+        let foundTile = await clickArr.map(y => y.find((x) => { if (x.id == e.target.id) return x })).filter(x => x != undefined)
+        console.log("foundTile: ",foundTile);
         foundTile = foundTile[0];
         let ind1 = foundTile.position[0]
         let ind2 = foundTile.position[1]
@@ -141,7 +142,7 @@ class Board extends React.Component {
         let blankCoord = [0,0];
         let tempArray = clickArr;
         // zero tile identifies all neighbors and randomly selects a move from one of these options
-        for (let i = Math.floor(Math.random() * 20)+5; i>0; i--){
+        for (let i = Math.floor(Math.random() * 40)+10; i>0; i--){
         let blankTile = clickArr.map(y => y.find((x) => { if (JSON.stringify(x.id) == JSON.stringify(blankCoord)) return x })).filter(x => x != undefined);
         blankTile= blankTile[0];
         let blankInd1= blankTile.position[0];
@@ -170,9 +171,9 @@ class Board extends React.Component {
     // make button say "start">"retry"> on win "Play again">reset board
     render() {
         return (
-            <Container className="text-center bg-light">
+            <Container className="border text-center bg-light">
                 <Row className="justify-content-center">
-                    <h1>Puzzle Slider</h1>
+                    <h1 className="text-info">Puzzle Slider</h1>
                 </Row>
                 {this.state.currentPOS.map(
                     (item, index) =>
@@ -183,7 +184,7 @@ class Board extends React.Component {
                                     input={item2}
                                     handleClick={this.handleClick}
                                 />))}</Row>)}
-                                <Row><Button onClick={this.shuffle}>Start</Button></Row>
+                                <Row className="justify-content-center"><Button className="btn btn-primary" onClick={this.shuffle}>Start</Button></Row>
             </Container>
         )
     }
